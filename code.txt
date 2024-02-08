@@ -1,0 +1,102 @@
+#include <Arduino.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#define INTERVAL 10000
+LiquidCrystal_I2C lcd(0x27, 16, 2); // 0x27 คือที่อยู่ของจอ LCD และ 16x2 คือขนาดของจอ LCD
+const int startStopSwitchPin = D5; // สวิตช์เริ่มหยุดการนับเวลา (D5)
+const int resetSwitchPin = D6; // สวิตช์รีเซ็ตเวลา (D6)
+unsigned long previousMillis = 0; // เก็บค่าเวลาของการตั้งเวลาล่าสุด
+unsigned long currentMillis = 0; // เวลาปัจจุบันที่ใช้ในการคำนวณ
+unsigned long elapsedTime = 0; // เวลาที่ผ่านไปตั้งแต่เริ่มนับเวลา
+boolean isTiming = false; // สถานะการนับเวลา (true = กำลังนับ, false = หยุด)
+// ประกาศฟังก์ชันแสดงผลเวลาไว้ก่อนที่จะใช้งาน
+const int led1 = D8;
+const int led2 = D7;
+const long interval = 10000;
+void displayTime(unsigned long minutes, unsigned long seconds, unsigned long milliseconds);
+void setup() {
+ pinMode(startStopSwitchPin, INPUT_PULLUP); // กำหนดให้สวิตช์เริ่มหยุดการนับเวลาเป็น INPUT และใช้ Pull-up resistor
+ pinMode(resetSwitchPin, INPUT_PULLUP); // กำหนดให้สวิตช์รีเซ็ตเวลาเป็น INPUT และใช้ Pull-up resistor
+ lcd.init(); // กำหนดการเริ่มต้นของจอ LCD
+ lcd.backlight(); // เปิดไฟหลังจอ LCD
+ displayTime(0, 0, 0); // แสดงผลเวลาเริ่มต้นที่ 0:0:0
+ pinMode(led1, OUTPUT);
+ pinMode(led2, OUTPUT);
+ Serial.begin(115200); // เริ่มต้นการสื่อสารทาง Serial
+}
+void loop() {
+ int startStopSwitchState = digitalRead(startStopSwitchPin); // อ่านสถานะของสวิตช์เริ่มหยุดการนับเวลา
+ int resetSwitchState = digitalRead(resetSwitchPin); // อ่านสถานะของสวิตช์รีเซ็ตเวลา
+ // ตรวจสอบการกดสวิตช์เริ่มหยุดการนับเวลา
+ if (startStopSwitchState == LOW) {
+ isTiming = !isTiming; // เปลี่ยนสถานะการนับเวลา (เริ่มหรือหยุด)
+ delay(200); // รอเพื่อป้องกันการกระพริบของสวิตช์
+ previousMillis = millis(); // บันทึกเวลาปัจจุบันเพื่อใช้ในการคำนวณ
+ }
+ // ตรวจสอบการกดสวิตช์รีเซ็ตเวลา
+ if (resetSwitchState == LOW) {
+ elapsedTime = 0; // รีเซ็ตเวลากลับไปที่ 0
+ displayTime(0, 0, 0); // แสดงผลเวลาที่รีเซ็ต
+ delay(200); // รอเพื่อป้องกันการกระพริบของสวิตช์
+ }
+ // หากกำลังนับเวลา
+ if (isTiming) {
+ currentMillis = millis(); // นับเวลาปัจจุบัน
+ elapsedTime += currentMillis - previousMillis; // บวกเวลาที่ผ่านไปตั้งแต่ครั้งที่เริ่มนับเวลาล่าสุด
+ previousMillis = currentMillis; // บันทึกเวลาปัจจุบันเพื่อใช้ในการคำนวณต่อไป
+ // แปลงเวลาที่ผ่านไปเป็น นาที:วินาที:มิลลิเซค
+ unsigned long minutes = (elapsedTime / 60000) % 60; // นาที
+ unsigned long seconds = (elapsedTime / 1000) % 60; // วินาที
+ unsigned long milliseconds = elapsedTime % 1000; // มิลลิเซค
+ // แสดงผลเวลาบนจอ LCD
+ displayTime(minutes, seconds, milliseconds);
+ }
+}
+// ฟังก์ชั่นแสดงผลเวลาบนจอ LCD
+void displayTime(unsigned long minutes, unsigned long seconds, unsigned long milliseconds) {
+ /*lcd.clear();*/ // ล้างจอ LCD
+ lcd.setCursor(3, 0); // ตำแหน่งแถวและคอลัมน์ของการแสดงผล
+lcd.print("Stopwatch: ");
+lcd.setCursor(3, 1);
+lcd.print(minutes);
+lcd.print("m ");
+lcd.setCursor(6, 1);
+lcd.print(seconds);
+lcd.print("s ");
+lcd.setCursor(10, 1);
+lcd.print(milliseconds);
+lcd.print("ms          ");
+ 
+ 
+if (milliseconds > 0) {
+  digitalWrite(led2, HIGH);
+  } else {
+  digitalWrite(led2, LOW);
+ 
+}
+{
+  static int prevValue = 0; // กำหนดค่าตัวแปร prevValue เป็น static และกำหนดค่าเริ่มต้นเป็น 0
+ 
+  // ตรวจสอบค่าที่ได้รับทาง Serial
+  //if (seconds > 0)
+  {
+    int receivedValue = seconds; // อ่านค่าที่ได้รับ
+ 
+    // ตรวจสอบว่าค่าเพิ่มขึ้นทีละ 10 หรือไม่
+    if (receivedValue == prevValue + 10) {
+      digitalWrite(led1, HIGH); // เปิด LED
+      delay(50); // รอเวลาสั้น ๆ
+      digitalWrite(led1, LOW); // ปิด LED
+      delay(50); // รอเวลาสั้น ๆ
+ 
+      prevValue = receivedValue; // อัปเดตค่า prevValue เป็นค่าใหม่
+    }
+  }
+  Serial.println(seconds);
+}
+ 
+  }
+ 
+ 
+ 
+ 
