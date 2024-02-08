@@ -1,3 +1,3 @@
 
-![MicrosoftTeams-image](https://github.com/thanawut2903/miniproject-Stopwatch/assets/159118913/8424bdc7-ff0b-4e44-8930-d43057d3aa4c)
-![MicrosoftTeams-image (1)](https://github.com/thanawut2903/miniproject-Stopwatch/assets/159118913/a6ed80e6-a1da-4941-9aa0-c60251ad7a06)
+![schematic](https://github.com/thanawut2903/miniproject-Stopwatch/assets/159118913/6df35db5-dbef-4164-b22c-e14edba8d878)
+![state diagram](https://github.com/thanawut2903/miniproject-Stopwatch/assets/159118913/a1e898b3-5ad7-4596-a206-7b979d671a2a)
